@@ -4,41 +4,80 @@
 
   // process the form
   if(isset($_POST['signup'])){
-    
-    $firstName = $_POST['firstName'];
-    $lastName = $_POST['lastName'];
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $rePassword = $_POST['passwordAgain'];
-    $gender = $_POST['gender'];
-    $month = $_POST['month'];
-    $day = $_POST['day'];
-    $year = $_POST['year'];
-    $birthdate = "{$year}-{$month}-{$day}";
+    // initialize an array to store any error messages from the form
+    $form_errors = array();
 
-    // hashing the password
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    // form validation
+    $required_fields = array('firstName', 'lastName', 'username', 'email', 'password', 'passwordAgain', 'gender', 'month', 'day', 'year');
+
+    // loop through the required fields array and populate the form error array
+    foreach($required_fields as $name_of_field){
+        if(!isset($_POST[$name_of_field]) || $_POST[$name_of_field] == NULL){
+            $form_errors[] = $name_of_field . " is a required field";
+        }
+    }
+
+    // check if error array is empty, if yes process form data and insert record
+    if(empty($form_errors)){
+      // collect form data and store in variables
+      $firstName = $_POST['firstName'];
+      $lastName = $_POST['lastName'];
+      $username = $_POST['username'];
+      $email = $_POST['email'];
+      $password = $_POST['password'];
+      $rePassword = $_POST['passwordAgain'];
+      $gender = $_POST['gender'];
+      $month = $_POST['month'];
+      $day = $_POST['day'];
+      $year = $_POST['year'];
+      $birthdate = "{$year}-{$month}-{$day}";
+
+      // hashing the password
+      $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     try{
-      // create SQL insert statement
-      $sqlInsert = "INSERT INTO users (firstName, lastName,username, email, password, gender, birthday, joined)
-                VALUES (:firstName, :lastName,:username, :email, :password, :gender, :birthday, now())";
-      
-      // use PDO prepared to sanitize data
-      $statement = $db->prepare($sqlInsert);
+        // create SQL insert statement
+        $sqlInsert = "INSERT INTO users (firstName, lastName,username, email, password, gender, birthday, joined)
+                  VALUES (:firstName, :lastName,:username, :email, :password, :gender, :birthday, now())";
+        
+          // use PDO prepared to sanitize data
+          $statement = $db->prepare($sqlInsert);
 
-      // add the data into the database
-      $statement->execute(array(':firstName' => $firstName,':lastName' => $lastName,':username' => $username, ':email' => $email, ':password' => $hashed_password, ':gender' => $gender, ':birthday' => $birthdate));
+          // add the data into the database
+          $statement->execute(array(':firstName' => $firstName,':lastName' => $lastName,':username' => $username, ':email' => $email, ':password' => $hashed_password, ':gender' => $gender, ':birthday' => $birthdate));
 
-      // check if one new row was created in db
-      if($statement->rowCount() == 1){
-        $result = "<p style='padding:20px; border: 1px solid gray; color: green;'> Registration Successful</p>";
-      }
+          // check if one new row was created in db
+          if($statement->rowCount() == 1){
+            $result = "<p style='padding:20px; border: 1px solid gray; color: green;'> Registration Successful</p>";
+          }
     }catch (PDOException $ex){
         $result = "<p style='padding:20px; border: 1px solid gray; color: red;'> An error occurred: ".$ex->getMessage()."</p>";
     }
-
   }
+  else{
+      if(count($form_errors) == 1){
+          $result = "<p style='color: red;'> There was 1 error in the form<br>";
+
+          $result .= "<ul style='color: red;'>";
+          //loop through error array and display all items
+          foreach($form_errors as $error){
+              $result .= "<li> {$error} </li>";
+          }
+          $result .= "</ul></p>";
+
+      }else{
+          $result = "<p style='color: red;'> There were " .count($form_errors). " errors in the form <br>";
+
+          $result .= "<ul style='color: red;'>";
+          //loop through error array and display all items
+          foreach($form_errors as $error){
+              $result .= "<li> {$error}</li>";
+          }
+          $result .= "</ul></p>";
+      }
+  }
+
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
