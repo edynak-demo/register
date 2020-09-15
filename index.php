@@ -1,4 +1,5 @@
 <?php 
+  include_once 'core/session.php';
   include_once 'core/database.php';
 
 ?>
@@ -10,10 +11,14 @@
   <title>Homepage</title>
 </head>
 <body>
-  <h2>User Authentication System </h2><hr>
+<h2>User Authentication System </h2><hr>
 
-  <P>You are currently not signed in <a href="login.php">Login</a> Not yet a member? <a href="signup.php">Sign up</a> </P>
+<?php if(!isset($_SESSION['username'])): ?>
+<P>You are currently not signed in <a href="login.php">Log in</a> Not yet a member? <a href="signup.php">Sign up</a> </P>
+<?php else: ?>
+<p>You are currently logged in as <?php if(isset($_SESSION['username'])) echo $_SESSION['username']; ?> <a href="logout.php">Log out</a> </p>
+<?php endif ?>
 
-  <p>You are logged in as {username} <a href="logout.php">Logout</a> </p>
+
 </body>
 </html>
