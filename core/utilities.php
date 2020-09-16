@@ -76,4 +76,36 @@ function show_errors($form_errors_array){
     $errors .= "</ul></p>";
     return $errors;
 }
+
+function flashMessage($message, $successOrError = "Error"){
+    if($successOrError === "Success"){
+        $data = "<p style='padding:20px; border: 1px solid gray; color: green;'>{$message}</p>";
+    }else{
+        $data = "<p style='padding:20px; border: 1px solid gray; color: red;'>{$message}</p>";
+    }
+
+    return $data;
+}
+
+function redirectTo($page){
+    header("Location: {$page}.php");
+}
+
+function checkDuplicates($table, $column_name, $value, $db){
+    try{
+        $sqlQuery = "SELECT * FROM " .$table. " WHERE " .$column_name."=:$column_name";
+        $statement = $db->prepare($sqlQuery);
+        $statement->execute(array(":$column_name" => $value));
+
+        if($row = $statement->fetch()){
+            return true;
+        }
+
+        return false;
+    }catch (PDOException $ex) {
+        // handle exception
+    }
+}
+
+
 ?>
